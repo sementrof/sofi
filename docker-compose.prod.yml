@@ -1,0 +1,83 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: sofi-db
+    environment:
+      POSTGRES_USER: sofi
+      POSTGRES_PASSWORD: sofi_prod_2024_secure_pass
+      POSTGRES_DB: sofi_db
+      PGDATABASE: sofi_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - sofi-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "PGPASSWORD=sofi_prod_2024_secure_pass pg_isready -U sofi -d sofi_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: sofi-backend
+    environment:
+      - PORT=8080
+      - DATABASE_URL=host=db user=sofi password=sofi_prod_2024_secure_pass dbname=sofi_db sslmode=disable
+      - DB_HOST=db
+      - POSTGRES_USER=sofi
+      - POSTGRES_PASSWORD=sofi_prod_2024_secure_pass
+      - POSTGRES_DB=sofi_db
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID:-}
+    volumes:
+      - ./backend/uploads:/root/uploads
+      - ./backend/dumps:/root/dumps
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - sofi-network
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sofi-frontend
+    expose:
+      - "3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=https://sofi-s.ru/api
+    depends_on:
+      - backend
+    networks:
+      - sofi-network
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    container_name: sofi-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - sofi-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  sofi-network:
+    driver: bridge
+

@@ -1,0 +1,71 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: luxe-db
+    environment:
+      POSTGRES_USER: luxe
+      POSTGRES_PASSWORD: luxe123
+      POSTGRES_DB: luxe_db
+      PGDATABASE: luxe_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - luxe-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "PGPASSWORD=luxe123 pg_isready -U luxe -d luxe_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: luxe-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - DATABASE_URL=host=db user=luxe password=luxe123 dbname=luxe_db sslmode=disable
+      - DB_HOST=db
+      - POSTGRES_USER=luxe
+      - POSTGRES_PASSWORD=luxe123
+      - POSTGRES_DB=luxe_db
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID:-}
+    volumes:
+      - ./backend/uploads:/root/uploads
+      - ./backend/dumps:/root/dumps
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - luxe-network
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: luxe-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://localhost:8080/api
+    depends_on:
+      - backend
+    networks:
+      - luxe-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  luxe-network:
+    driver: bridge
+
