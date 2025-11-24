@@ -1,5 +1,8 @@
 FROM golang:1.21-alpine AS builder
 
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories && \
+    apk update
+
 WORKDIR /app
 
 # Install build dependencies
