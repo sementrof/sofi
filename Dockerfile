@@ -1,11 +1,8 @@
 FROM node:20-alpine AS base
 
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories && \
-    apk update
-
 # Install dependencies only when needed
 FROM base AS deps
-RUN apk add --no-cache libc6-compat
+
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
