@@ -1,46 +1,34 @@
-# -----------------------------
-# 1. Builder stage (Go build)
-# -----------------------------
-FROM --platform=$BUILDPLATFORM golang:1.21-alpine AS builder
-
-# Automatically provided by Docker BuildKit during cross-compilation:
-#   TARGETOS=linux
-#   TARGETARCH=amd64 (or arm64 if explicitly requested)
-ARG TARGETOS
-ARG TARGETARCH
+# Используем чистый образ Go для сборки
+FROM golang:1.21-alpine AS builder
 
 WORKDIR /app
 
-# Install build dependencies
+# Установка зависимостей для сборки
 RUN apk add --no-cache gcc musl-dev
 
-# Download Go modules
+# Загрузка модулей Go
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Copy source code
+# Копирование исходного кода
 COPY . .
 
-# Build Go binary for the TARGET platform (not host Mac)
-RUN GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o main .
-
+# Важно: отключаем CGO для статической сборки
+RUN CGO_ENABLED=0 GOOS=linux go build -o main .
 
 # -----------------------------
-# 2. Final runtime stage
+# Финальный образ для запуска
 # -----------------------------
 FROM alpine:3.20
 
-# Stable PostgreSQL client package
 RUN apk --no-cache add ca-certificates curl postgresql-client
-
 WORKDIR /root/
 
-# Copy the compiled binary
+# Копируем статический бинарник из стадии сборки
 COPY --from=builder /app/main .
 
-# App directories
+# Создаем необходимые директории
 RUN mkdir -p uploads dumps
 
 EXPOSE 8080
-
 CMD ["./main"]
