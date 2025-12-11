@@ -24,6 +24,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    platform: linux/amd64
     container_name: luxe-backend
     ports:
       - "8080:8080"
@@ -50,6 +51,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    platform: linux/amd64
     container_name: luxe-frontend
     ports:
       - "3000:3000"
