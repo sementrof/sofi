@@ -1558,7 +1558,7 @@ func main() {
 
 	// CORS middleware
 	c := cors.New(cors.Options{
-		AllowedOrigins: []string{"http://localhost:3000", "http://frontend:3000"},
+		AllowedOrigins: []string{"http://localhost:3000", "http://frontend:3000", "http://http://178.20.208.77/:3000"},
 		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders: []string{"*"},
 	})

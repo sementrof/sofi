@@ -1,19 +1,23 @@
+version: '3.8'
+
 services:
   db:
     image: postgres:15-alpine
-    container_name: sofi-db
+    container_name: luxe-db
     environment:
-      POSTGRES_USER: sofi
-      POSTGRES_PASSWORD: sofi_prod_2024_secure_pass
-      POSTGRES_DB: sofi_db
-      PGDATABASE: sofi_db
+      POSTGRES_USER: luxe
+      POSTGRES_PASSWORD: luxe123
+      POSTGRES_DB: luxe_db
+      PGDATABASE: luxe_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
     networks:
-      - sofi-network
+      - luxe-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "PGPASSWORD=sofi_prod_2024_secure_pass pg_isready -U sofi -d sofi_db"]
+      test: ["CMD-SHELL", "PGPASSWORD=luxe123 pg_isready -U luxe -d luxe_db"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -22,16 +26,21 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: sofi-backend
+    platform: linux/amd64
+    container_name: luxe-backend
+    ports:
+      - "8080:8080"
     environment:
       - PORT=8080
-      - DATABASE_URL=host=db user=sofi password=sofi_prod_2024_secure_pass dbname=sofi_db sslmode=disable
+      - DATABASE_URL=host=db user=luxe password=luxe123 dbname=luxe_db sslmode=disable
       - DB_HOST=db
-      - POSTGRES_USER=sofi
-      - POSTGRES_PASSWORD=sofi_prod_2024_secure_pass
-      - POSTGRES_DB=sofi_db
+      - POSTGRES_USER=luxe
+      - POSTGRES_PASSWORD=luxe123
+      - POSTGRES_DB=luxe_db
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
       - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID:-}
+      # Разрешенные origins для CORS
+      - ALLOWED_ORIGINS=http://localhost:3000,http://frontend:3000,http://178.20.208.77:3000,http://127.0.0.1:3000
     volumes:
       - ./backend/uploads:/root/uploads
       - ./backend/dumps:/root/dumps
@@ -39,45 +48,32 @@ services:
       db:
         condition: service_healthy
     networks:
-      - sofi-network
+      - luxe-network
     restart: unless-stopped
 
   frontend:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: sofi-frontend
-    expose:
-      - "3000"
+    platform: linux/amd64
+    container_name: luxe-frontend
+    ports:
+      - "3000:3000"
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=https://sofi-s.ru/api
+      # Используем имя сервиса backend для внутренней коммуникации
+      - NEXT_PUBLIC_API_URL=http://backend:8080/api
+      # Если нужно обращаться с клиента, можно также добавить переменную
+      - NEXT_PUBLIC_CLIENT_API_URL=http://localhost:8080/api
     depends_on:
       - backend
     networks:
-      - sofi-network
-    restart: unless-stopped
-
-  nginx:
-    image: nginx:alpine
-    container_name: sofi-nginx
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
-      - /etc/letsencrypt:/etc/letsencrypt:ro
-    depends_on:
-      - frontend
-      - backend
-    networks:
-      - sofi-network
+      - luxe-network
     restart: unless-stopped
 
 volumes:
   postgres_data:
 
 networks:
-  sofi-network:
+  luxe-network:
     driver: bridge
-
