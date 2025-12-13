@@ -66,12 +66,12 @@ type Contact struct {
 }
 
 type Placeholder struct {
-	ID          int    `json:"id"`
-	Path        string `json:"path"`
-	Title       string `json:"title"`
-	Message     string `json:"message"`
-	IsActive    bool   `json:"is_active"`
-	CreatedAt   time.Time `json:"created_at"`
+	ID        int       `json:"id"`
+	Path      string    `json:"path"`
+	Title     string    `json:"title"`
+	Message   string    `json:"message"`
+	IsActive  bool      `json:"is_active"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type FAQ struct {
@@ -1187,10 +1187,10 @@ func createDump(w http.ResponseWriter, r *http.Request) {
 	// Return dump info
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"status":       "success",
-		"filename":     dumpFilename,
-		"path":         fmt.Sprintf("/dumps/%s", dumpFilename),
-		"size":         getFileSize(dumpPath),
+		"status":        "success",
+		"filename":      dumpFilename,
+		"path":          fmt.Sprintf("/dumps/%s", dumpFilename),
+		"size":          getFileSize(dumpPath),
 		"telegram_sent": telegramSent,
 	})
 }
