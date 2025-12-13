@@ -1,56 +1,58 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import Header from '@/components/header'
-import Footer from '@/components/footer'
-import { Phone, Mail, MapPin, Send } from 'lucide-react'
+import { useState } from "react";
+import Header from "@/components/header";
+import Footer from "@/components/footer";
+import { Phone, Mail, MapPin, Send } from "lucide-react";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api'
-
+// const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api'
+const API_URL = "http://178.20.208.77:8080/api";
 function ContactForm() {
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    message: '',
-  })
-  const [submitted, setSubmitted] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+    name: "",
+    email: "",
+    phone: "",
+    message: "",
+  });
+  const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
-  }
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
+    e.preventDefault();
+    setLoading(true);
+    setError("");
 
     try {
       const res = await fetch(`${API_URL}/contacts`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
-      })
+      });
 
       if (res.ok) {
-        setSubmitted(true)
-        setFormData({ name: '', email: '', phone: '', message: '' })
-        setTimeout(() => setSubmitted(false), 5000)
+        setSubmitted(true);
+        setFormData({ name: "", email: "", phone: "", message: "" });
+        setTimeout(() => setSubmitted(false), 5000);
       } else {
-        setError('Ошибка при отправке формы. Попробуйте еще раз.')
+        setError("Ошибка при отправке формы. Попробуйте еще раз.");
       }
     } catch (err) {
-      console.error('Error submitting form:', err)
-      setError('Ошибка при отправке формы. Попробуйте еще раз.')
+      console.error("Error submitting form:", err);
+      setError("Ошибка при отправке формы. Попробуйте еще раз.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -126,40 +128,40 @@ function ContactForm() {
         className="w-full px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-lg hover:opacity-90 transition disabled:opacity-50 flex items-center justify-center gap-2"
       >
         <Send className="w-5 h-5" />
-        {loading ? 'Отправка...' : 'Отправить сообщение'}
+        {loading ? "Отправка..." : "Отправить сообщение"}
       </button>
 
       {submitted && (
         <div className="p-4 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg text-green-800 dark:text-green-200 text-center font-medium">
-          Спасибо! Ваше сообщение отправлено. Мы свяжемся с вами в ближайшее время.
+          Спасибо! Ваше сообщение отправлено. Мы свяжемся с вами в ближайшее
+          время.
         </div>
       )}
     </form>
-  )
+  );
 }
 
 export default function ContactPage() {
-
   const contactInfo = [
     {
       icon: Phone,
-      title: 'Телефон',
-      content: '+1 (555) 123-4567',
-      subtext: 'Пн-Пт, 9:00-18:00 EST'
+      title: "Телефон",
+      content: "+1 (555) 123-4567",
+      subtext: "Пн-Пт, 9:00-18:00 EST",
     },
     {
       icon: Mail,
-      title: 'Email',
-      content: 'sales@sofi.ru',
-      subtext: 'Ответ в течение 24 часов'
+      title: "Email",
+      content: "sales@sofi.ru",
+      subtext: "Ответ в течение 24 часов",
     },
     {
       icon: MapPin,
-      title: 'Адрес',
-      content: '123 Design Avenue',
-      subtext: 'Нью-Йорк, NY 10001, США'
+      title: "Адрес",
+      content: "123 Design Avenue",
+      subtext: "Нью-Йорк, NY 10001, США",
     },
-  ]
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -173,7 +175,8 @@ export default function ContactPage() {
               Свяжитесь с нами
             </h1>
             <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
-              Есть вопросы? Наша команда готова помочь вам найти идеальное мебельное решение.
+              Есть вопросы? Наша команда готова помочь вам найти идеальное
+              мебельное решение.
             </p>
           </div>
         </section>
@@ -196,7 +199,7 @@ export default function ContactPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-12 sm:mb-16">
               {contactInfo.map((info, idx) => {
-                const Icon = info.icon
+                const Icon = info.icon;
                 return (
                   <div
                     key={idx}
@@ -205,19 +208,22 @@ export default function ContactPage() {
                     <div className="w-12 h-12 mx-auto bg-primary/10 rounded-full flex items-center justify-center">
                       <Icon className="w-6 h-6 text-primary" />
                     </div>
-                    <h3 className="font-semibold text-foreground">{info.title}</h3>
+                    <h3 className="font-semibold text-foreground">
+                      {info.title}
+                    </h3>
                     <p className="font-medium text-primary">{info.content}</p>
-                    <p className="text-sm text-muted-foreground">{info.subtext}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {info.subtext}
+                    </p>
                   </div>
-                )
+                );
               })}
             </div>
           </div>
         </section>
-
       </main>
 
       <Footer />
     </div>
-  )
+  );
 }
