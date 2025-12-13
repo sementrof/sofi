@@ -39,8 +39,6 @@ services:
       - POSTGRES_DB=luxe_db
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
       - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID:-}
-      # Разрешенные origins для CORS
-      - ALLOWED_ORIGINS=http://localhost:3000,http://frontend:3000,http://178.20.208.77:3000,http://127.0.0.1:3000
     volumes:
       - ./backend/uploads:/root/uploads
       - ./backend/dumps:/root/dumps
@@ -61,10 +59,7 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      # Используем имя сервиса backend для внутренней коммуникации
-      - NEXT_PUBLIC_API_URL=http://backend:8080/api
-      # Если нужно обращаться с клиента, можно также добавить переменную
-      - NEXT_PUBLIC_CLIENT_API_URL=http://localhost:8080/api
+      - NEXT_PUBLIC_API_URL=http://178.20.208.77:8080/api
     depends_on:
       - backend
     networks:
